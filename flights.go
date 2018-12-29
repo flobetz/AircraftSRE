@@ -5,10 +5,9 @@ import (
 	"log"
 	"encoding/json"
 	"fmt"
-	//"strconv"
 	"database/sql"
 	_ "github.com/lib/pq"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -53,34 +52,27 @@ func main() {
 	db.Query("CREATE TABLE flights (flightnumber varchar(255), startloc varchar(255), endloc varchar(255), aircraft varchar(255))")
 	db.Query("CREATE TABLE planes (name varchar(255), seatcount int)")
 
-
-    // print flightDB array first
-	printFlightArray(flightDB)
-
 	// initiate http router
-	router := mux.NewRouter()
+	router := httprouter.New()
 
 	// define http routes and map to functions
-	router.HandleFunc("/v1/flights", createFlight).Methods("POST")
-	router.HandleFunc("/v1/flights", getAllFlight).Methods("GET")
-	router.HandleFunc("/v1/flights/{id}", getSpecificFlight).Methods("GET")
-	router.HandleFunc("/v1/flights/{id}", deleteFlight).Methods("DELETE")
+	router.POST("/v1/flights", createFlight)
+	router.GET("/v1/flights", getAllFlight)
+	router.GET("/v1/flights/:number", getSpecificFlight)
+	router.DELETE("/v1/flights/:number", deleteFlight)
 
+	// start serving API
 	log.Fatal(http.ListenAndServe(":80", router))
 }
 
-func createFlight(w http.ResponseWriter, request *http.Request) {
+func createFlight(w http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	db.Query("INSERT INTO flights VALUES ('flug1', 'ehingen', 'stuttgart', 'flugzeug1')")
 	//db.Prepare("INSERT INTO flights(flightnumber, startloc, endloc, aircraft) VALUES (flug1, ehingen, stuttgart, flugzeug1)")
 	w.Write([]byte("flight saved!\n"))
 }
 
-func deleteFlight(w http.ResponseWriter, request *http.Request) {
-	db.Query("DELETE FROM flights WHERE flightnumber='flug1'")
-	w.Write([]byte("flight deleted\n"))
-}
 
-func getAllFlight(w http.ResponseWriter, request *http.Request) {
+func getAllFlight(w http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// get all flights from Database
 	db.Query("SELECT * FROM flights")
 	fmt.Fprint(w, "here are all saved flights:\n")
@@ -88,16 +80,11 @@ func getAllFlight(w http.ResponseWriter, request *http.Request) {
 	w.Write(json)
 }
 
-func getSpecificFlight(w http.ResponseWriter, request *http.Request) {
+func getSpecificFlight(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
 	w.Write([]byte("Get specific flight\n"))
-	vars := mux.Vars(request)
-	id, err := vars["id"]
-	if err != true {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	number := ps.ByName("number")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Category: %v\n", id)
+	fmt.Fprintf(w, "Flightnumber was: %v\n", number)
 
 
 	// get specific flight information from DB
@@ -105,6 +92,12 @@ func getSpecificFlight(w http.ResponseWriter, request *http.Request) {
 	//db.Query("SELECT * FROM flights WHERE flightnumber=?", id)
 }
 
-func printFlightArray(flightDB []Flight) {
-	fmt.Printf("len=%d cap=%d %v\n", len(flightDB), cap(flightDB), flightDB)
+func deleteFlight(w http.ResponseWriter, request *http.Request, ps httprouter.Params) {
+	w.Write([]byte("Delete flight!\n"))
+	number := ps.ByName("number")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Flightnumber to delete was: %v\n", number)
+
+	//db.Query("DELETE FROM flights WHERE flightnumber='flug1'")
+	//w.Write([]byte("flight deleted\n"))
 }

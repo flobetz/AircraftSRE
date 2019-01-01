@@ -1,1 +1,3 @@
 .idea/
+infrastructure/Doku
+infrastructure/setTerraformAzureEnv.sh

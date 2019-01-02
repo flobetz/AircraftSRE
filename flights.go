@@ -42,17 +42,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 		println("could not create connection to postgres DB")
+		return
 	}
 
 	if err = db.Ping(); err != nil {
 		println(err)
 		println("could not open connection to postgres DB")
+		return
 	}
 
 	// this should be done on startup of the postgres docker container
 	db.Query("CREATE TABLE flights (flightnumber varchar(255), startloc varchar(255), endloc varchar(255), aircraft varchar(255), departure TIMESTAMP)")
 
-	println("connection established")
 	defer db.Close()
 
 	// initiate http router

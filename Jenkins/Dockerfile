@@ -28,10 +28,14 @@ RUN apt-get install apt-transport-https lsb-release software-properties-common -
 
 # install kubectl
 ADD https://storage.googleapis.com/kubernetes-release/release/v1.6.4/bin/linux/amd64/kubectl /usr/local/bin/kubectl
-ENV HOME=/config
 RUN set -x && \
     apt-get -y install curl ca-certificates && \
     chmod +x /usr/local/bin/kubectl
+
+# install terraform
+RUN wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip && \
+    unzip terraform_0.11.11_linux_amd64.zip && \
+    mv terraform /usr/local/bin/
 
 USER jenkins
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/jenkins.sh"]

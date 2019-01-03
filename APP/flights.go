@@ -1,4 +1,4 @@
-package APP
+package main
 
 import (
 	"net/http"
@@ -37,7 +37,7 @@ func main() {
 	// create ai
 	// init db
 	// establish DB connection
-	connStr := "user=postgres dbname=postgres password=postgres host=127.0.0.1 port=5432 sslmode=disable"
+	connStr := "user=postgres dbname=postgres password=postgres host=database port=5432 sslmode=disable"
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -51,6 +51,7 @@ func main() {
 		return
 	}
 
+	println("Connection to DB successful")
 	// this should be done on startup of the postgres docker container
 	db.Query("CREATE TABLE flights (flightnumber varchar(255), startloc varchar(255), endloc varchar(255), aircraft varchar(255), departure TIMESTAMP)")
 

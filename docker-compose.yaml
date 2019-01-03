@@ -4,20 +4,24 @@ services:
     image: flightoperatorreg.azurecr.io/postgres:latest
     container_name: database
     ports:
-        - "5432:5432"
+        - "5432"
     restart: always
-    deploy:
-      replicas: 1
-      restart_policy:
-          condition: on-failure
-
   flightoperator:
     image: flightoperatorreg.azurecr.io/flightoperator:latest
     container_name: flightoperator
     ports:
         - "80:80"
+        - "2112:2112"
     restart: always
-    deploy:
-        replicas: 1
-        restart_policy:
-            condition: on-failure
+  prometheus:
+    image: flightoperatorreg.azurecr.io/prometheus:latest
+    container_name: prometheus
+    ports:
+        - "9090:9090"
+  grafana:
+      image: flightoperatorreg.azurecr.io/grafana:latest
+      container_name: grafana
+      ports:
+       - "3000:3000"
+      depends_on:
+        - prometheus

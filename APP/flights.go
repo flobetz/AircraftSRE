@@ -34,8 +34,10 @@ var aircraft3 = Aircraft{Name: "Airbus A340", SeatCount: 300}
 
 // Entrypoint
 func main() {
-	// create ai
-	// init db
+	// define basic auth users and passwords
+	user := "flightoperator"
+	password := "topsecret!"
+
 	// establish DB connection
 	connStr := "user=postgres dbname=postgres password=postgres host=database port=5432 sslmode=disable"
 	db, err = sql.Open("postgres", connStr)
@@ -61,13 +63,29 @@ func main() {
 	router := httprouter.New()
 
 	// define http routes and map to functions
-	router.POST("/v1/flights", createFlight(db))
-	router.GET("/v1/flights", getAllFlight(db))
-	router.GET("/v1/flights/:flightnumber", getSpecificFlight(db))
-	router.DELETE("/v1/flights/:flightnumber", deleteFlight(db))
+	router.POST("/v1/flights", BasicAuth(createFlight(db), user, password))
+	router.GET("/v1/flights", BasicAuth(getAllFlight(db), user, password))
+	router.GET("/v1/flights/:flightnumber", BasicAuth(getSpecificFlight(db), user, password))
+	router.DELETE("/v1/flights/:flightnumber", BasicAuth(deleteFlight(db), user, password))
 
 	// start serving API
 	log.Fatal(http.ListenAndServe(":80", router))
+}
+
+func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		// Get the Basic Authentication credentials
+		user, password, hasAuth := r.BasicAuth()
+
+		if hasAuth && user == requiredUser && password == requiredPassword {
+			// Delegate request to the given handle
+			h(w, r, ps)
+		} else {
+			// Request Basic Authentication otherwise
+			w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		}
+	}
 }
 
 func createFlight(db *sql.DB) func(w http.ResponseWriter, request *http.Request, _ httprouter.Params) {

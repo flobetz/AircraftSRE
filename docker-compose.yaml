@@ -1,0 +1,23 @@
+version: '3'
+services:
+  database:
+    image: flightoperatorreg.azurecr.io/postgres:latest
+    container_name: database
+    ports:
+        - "5432:5432"
+    restart: always
+    deploy:
+      replicas: 1
+      restart_policy:
+          condition: on-failure
+
+  flightoperator:
+    image: flightoperatorreg.azurecr.io/flightoperator:latest
+    container_name: flightoperator
+    ports:
+        - "80:80"
+    restart: always
+    deploy:
+        replicas: 1
+        restart_policy:
+            condition: on-failure

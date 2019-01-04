@@ -1,7 +1,10 @@
 # AircraftSRE
-simple golang Aircraft webservice, running in Docker on k8s, made for cloud, built and deployed with JenkinsX
+simple golang flights webservice, running in Docker on k8s on Azure, built and deployed with Jenkins. All packed in this repo
 
 ToDo:
+- :white_check_mark: Create go application which serves a REST API
+- :white_check_mark: Create flights endpoints
+- :white_check_mark: put App in a docker container
 - :white_check_mark: Create Jenkins Docker image with docker, kubectl, azure cli
 - :white_check_mark: deploy app image on Azure registry with local Jenkins instance
 - :white_check_mark: deploy db image on Azure registry with local Jenkins instance

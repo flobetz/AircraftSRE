@@ -2,6 +2,9 @@
 
 node("master"){
 
+    // set scm trigger
+    properties([pipelineTriggers([pollSCM('* * * * *')])])
+
     echo "branchname: ${env.BRANCH_NAME}"
 
     // check branchname

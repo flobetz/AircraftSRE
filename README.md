@@ -23,7 +23,7 @@ ToDo:
 - :white_check_mark: Share Grafana URL within Repo:  
   [http://flightoperator-grafana.eastus.cloudapp.azure.com](http://flightoperator-grafana.eastus.cloudapp.azure.com:3000)  
   [http://flightoperator.eastus.cloudapp.azure.com/v1/flights](http://flightoperator.eastus.cloudapp.azure.com/v1/flights)  
-- enable auto deployments when merging to master / develop (Jenkins)
+- :white_check_mark: enable auto deployments when merging to master / develop (Jenkins)
 - enable plugins.txt for Jenkins (and save in repo)
 - enable config as code for Jenkins (and sae in repo)
 - add some users to grafana

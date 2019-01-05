@@ -27,4 +27,3 @@ ToDo:
 - enable plugins.txt for Jenkins (and save in repo)
 - enable config as code for Jenkins (and sae in repo)
 - add some users to grafana
-https://docs.microsoft.com/de-de/azure/container-service/kubernetes/

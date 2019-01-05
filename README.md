@@ -1,6 +1,21 @@
 # AircraftSRE
 simple golang flights webservice, running in Docker on k8s on Azure, built and deployed with Jenkins. All packed in this repo
 
+### What this project consists of
+- local Jenkins Dockerfile, build and startup script with docker socket and var/jenkins_home dir mounted
+- PostgreSQL Dockerfile and a startup script
+- flights.go a simple go webapp which serves a REST API for flight management and a endpoint for metrics
+- Dockerfile for the flights app
+- Prometheus Dockerfile and config to scrape metrics from the flights app
+- Grafana Dockerfile, config, dashboard and data sources to visualize the metrics prometheus scrapes
+- Azure AKS infrastructure written in terraform deployed with terraform and Jenkins
+- Kubernetes Deployment file for the whole stack (App, DB, prometheus, grafana)
+- Jenkins Pipeline scripts to build and upload all docker images into private Azure registry
+- Jenkins Pipeline script to deploy the Azure infrastructure using terraform
+- Jenkins Pipeline script which automatically updates the whole stack when changes happen on the master branch
+- docker-compose file for the whole stack which can be used for local testing
+- some testing scripts which call the flights endpoints
+
 ToDo:
 - :white_check_mark: Create go application which serves a REST API
 - :white_check_mark: Create flights endpoints
@@ -24,6 +39,6 @@ ToDo:
   [http://flightoperator-grafana.eastus.cloudapp.azure.com](http://flightoperator-grafana.eastus.cloudapp.azure.com:3000)  
   [http://flightoperator.eastus.cloudapp.azure.com/v1/flights](http://flightoperator.eastus.cloudapp.azure.com/v1/flights)  
 - :white_check_mark: enable auto deployments when merging to master / develop (Jenkins)
-- enable plugins.txt for Jenkins (and save in repo)
-- enable config as code for Jenkins (and sae in repo)
-- add some users to grafana
+- [optional] enable plugins.txt for Jenkins (and save in repo)
+- [optional] enable config as code for Jenkins (and sae in repo)
+- [optional] add some users to grafana

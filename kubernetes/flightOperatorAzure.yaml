@@ -12,6 +12,7 @@ spec:
       containers:
       - name: database
         image: flightoperatorreg.azurecr.io/postgres:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5432
       imagePullSecrets:
@@ -46,6 +47,7 @@ spec:
       containers:
       - name: flightoperator
         image: flightoperatorreg.azurecr.io/flightoperator:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         - containerPort: 2112
@@ -85,6 +87,7 @@ spec:
       containers:
       - name: prometheus
         image: flightoperatorreg.azurecr.io/prometheus:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 9090
       imagePullSecrets:
@@ -119,6 +122,7 @@ spec:
       containers:
       - name: grafana
         image: flightoperatorreg.azurecr.io/grafana:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         resources:

@@ -12,6 +12,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/goji/httpauth"
+	"strconv"
+	"github.com/pkg/errors"
 )
 
 // define used structs and interfaces
@@ -22,8 +24,15 @@ type Aircraft struct {
 
 type Flight struct {
 	FlightNumber string
-	StartLoc string
-	EndLoc string
+	Start string
+	End string
+	Departure time.Time
+	Aircraft string
+}
+
+type NoFlightNumber struct {
+	Start string
+	End string
 	Departure time.Time
 	Aircraft string
 }
@@ -84,7 +93,7 @@ func main() {
 		return
 	}
 	println("Connection to DB successful")
-	db.Query("CREATE TABLE flights (flightnumber varchar(255), startloc varchar(255), endloc varchar(255), aircraft varchar(255), departure TIMESTAMP)")
+	db.Query("CREATE TABLE flights (flightnumber INTEGER , startloc varchar(255), endloc varchar(255), aircraft varchar(255), departure TIMESTAMP);")
 	defer db.Close()
 
 	// start serving metrics
@@ -127,11 +136,9 @@ func customMetrics(db *sql.DB) {
 			err := db.QueryRow("SELECT COUNT(*) FROM  flights;").Scan(&amountFlights)
 			amountFlightsGauge.Set(amountFlights)
 			if err != nil {
-				println("DB is not working")
 				dbAlive.Set(0)
 			} else {
 				dbAlive.Set(1)
-				println("DB is working")
 			}
 			time.Sleep(4 * time.Second)
 		}
@@ -158,28 +165,30 @@ func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httpr
 // flights endpoint functions
 func createFlight(db *sql.DB) func(w http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	return func(w http.ResponseWriter, request *http.Request, _ httprouter.Params) {
-		// define an empty flight
-		var f Flight
-		// check incoming body for content
-		if request.Body == nil {
-			http.Error(w, "Please send a request body", 400)
-			return
-		}
-		// json decode request body apply to the flight object, save fields in flight f and output in err
-		err := json.NewDecoder(request.Body).Decode(&f)
-		// check err
-		checkErr(err, w)
+		// define an empty flight and a flight without flightnumber
+		var (
+			noNumber NoFlightNumber
+			maxFlightnumber int
+			newFlightnumber int
+			newNumberAsString string
+		)
 
-		// check aircraftname of request
-		if ! (f.Aircraft == aircraft1.Name || f.Aircraft == aircraft2.Name || f.Aircraft == aircraft3.Name) {
+		// validate json body
+		noNumber, err = validate(request)
+		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
+		// create new flight number
+		err = db.QueryRow("SELECT COUNT(*) FROM  flights;").Scan(&maxFlightnumber)
+		newFlightnumber = maxFlightnumber + 1
+		newNumberAsString = strconv.Itoa(newFlightnumber)
+
 		// paste values of json input into DB
-		db.Query("INSERT INTO flights VALUES($1,$2,$3,$4,$5);", f.FlightNumber, f.StartLoc, f.EndLoc, f.Aircraft, f.Departure)
+		db.Query("INSERT INTO flights VALUES($1,$2,$3,$4,$5);", newFlightnumber, noNumber.Start, noNumber.End, noNumber.Aircraft, noNumber.Departure)
 		w.WriteHeader(http.StatusOK)
-		location := "Location: /v1/flights/" + f.FlightNumber + "\n"
+		location := "Location: /v1/flights/" + newNumberAsString + "\n"
 		w.Write([]byte(location))
 
 		// increase create Counter metric
@@ -194,8 +203,8 @@ func getAllFlight(db *sql.DB) func(w http.ResponseWriter, request *http.Request,
 			flights []Flight
 			f Flight
 			FlightNumber string
-			StartLoc string
-			EndLoc string
+			Start string
+			End string
 			Aircraft string
 			Departure time.Time
 		)
@@ -204,9 +213,9 @@ func getAllFlight(db *sql.DB) func(w http.ResponseWriter, request *http.Request,
 		checkErr(err, w)
 		defer rows.Close()
 		for rows.Next() {
-			err := rows.Scan(&FlightNumber, &StartLoc, &EndLoc, &Aircraft, &Departure)
+			err := rows.Scan(&FlightNumber, &Start, &End, &Aircraft, &Departure)
 			checkErr(err, w)
-			f = Flight{FlightNumber:FlightNumber, StartLoc:StartLoc, EndLoc:EndLoc, Aircraft:Aircraft, Departure:Departure}
+			f = Flight{FlightNumber:FlightNumber, Start:Start, End:End, Aircraft:Aircraft, Departure:Departure}
 			flights = append(flights, f)
 		}
 		w.WriteHeader(http.StatusOK)
@@ -222,8 +231,8 @@ func getSpecificFlight(db *sql.DB) func(w http.ResponseWriter, request *http.Req
 		var (
 			f Flight
 			FlightNumber string
-			StartLoc string
-			EndLoc string
+			Start string
+			End string
 			Aircraft string
 			Departure time.Time
 			exists string
@@ -237,11 +246,11 @@ func getSpecificFlight(db *sql.DB) func(w http.ResponseWriter, request *http.Req
 		if exists == "1" {
 			// flightnumber exists
 			// get specific flight information from DB
-			err = db.QueryRow("SELECT * FROM flights WHERE flightnumber=$1", FlightNumber).Scan(&FlightNumber, &StartLoc, &EndLoc, &Aircraft, &Departure)
+			err = db.QueryRow("SELECT * FROM flights WHERE flightnumber=$1", FlightNumber).Scan(&FlightNumber, &Start, &End, &Aircraft, &Departure)
 			checkErr(err, w)
 
 			// encode to json and send http response
-			f = Flight{FlightNumber:FlightNumber, StartLoc:StartLoc, EndLoc:EndLoc, Aircraft:Aircraft, Departure:Departure}
+			f = Flight{FlightNumber:FlightNumber, Start:Start, End:End, Aircraft:Aircraft, Departure:Departure}
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(f)
 		} else {
@@ -274,4 +283,60 @@ func checkErr(err error, w http.ResponseWriter) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func validate(request *http.Request) (NoFlightNumber, error) {
+	noNumber := NoFlightNumber{}
+
+	err = json.NewDecoder(request.Body).Decode(&noNumber)
+
+	// check incoming body for content
+	if request.Body == nil {
+		err = errors.New("Please send a JSON body")
+		return noNumber, err
+	}
+
+	if err != nil {
+		err = errors.New("JSON body does not fit")
+		return noNumber, err
+	}
+
+	// check if start empty
+	if noNumber.Start == "" {
+		err = errors.New("Field start has to be given")
+		return noNumber, err
+	}
+
+	// check if end empty
+	if noNumber.End == "" {
+		err = errors.New("Field end has to be given")
+		return noNumber, err
+	}
+
+	// check if aircraft empty
+	if noNumber.Aircraft == "" {
+		err = errors.New("Field aircraft has to be given")
+		return noNumber, err
+	}
+
+	// check if departure empty
+	if noNumber.Departure.String() == "" {
+		err = errors.New("Field departure has to be given")
+		return noNumber, err
+	}
+
+	// check if departure time is in future
+	if noNumber.Departure.Before(time.Now()) {
+		err = errors.New("Departure time must be in future")
+		return noNumber, err
+	}
+
+	// check aircraftname of request
+	if ! (noNumber.Aircraft == aircraft1.Name || noNumber.Aircraft == aircraft2.Name || noNumber.Aircraft == aircraft3.Name) {
+		err = errors.New("Aircraft type is not correct, please choose 'DHC-8-400', 'Boeing B737' or 'Airbus A340'")
+		return noNumber, err
+	}
+
+	err = nil
+	return noNumber, err
 }

@@ -5,7 +5,7 @@ node("master"){
     echo "branchname: ${env.BRANCH_NAME}"
 
     // check branchname
-    if (env.BRANCH_NAME.equals("master")) {
+    if (env.BRANCH_NAME.equals("testing")) {
 
         // checkout repo
         stage("Checkout") {

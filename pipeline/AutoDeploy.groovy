@@ -2,7 +2,7 @@
 
 node("master"){
 
-    // set scm trigger
+    // set scm trigger to scan for changes on repo every minute
     properties([pipelineTriggers([pollSCM('* * * * *')])])
 
     echo "branchname: ${env.BRANCH_NAME}"

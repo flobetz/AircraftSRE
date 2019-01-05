@@ -15,11 +15,16 @@ ToDo:
 - :white_check_mark: configure pronmetheus
 - :white_check_mark: configure grafana
 - :white_check_mark: put prometheus and grafana into docker-compose
-- check departure time of a new flight
-- remove flight number from POST request
-- automatically create flight number when creating a new flight 
-- create Jenkins build jobs for prometheus and grafana container
-- add prometheus and grafana instance into kubernetes cluster
-- Share Grafana URL within Repo
+- :white_check_mark: check departure time of a new flight
+- :white_check_mark: remove flight number from POST request
+- :white_check_mark: automatically create flight number when creating a new flight 
+- :white_check_mark: create Jenkins build jobs for prometheus and grafana container
+- :white_check_mark: add prometheus and grafana instance into kubernetes cluster
+- :white_check_mark: Share Grafana URL within Repo:  
+  [http://flightoperator-grafana.eastus.cloudapp.azure.com](http://flightoperator-grafana.eastus.cloudapp.azure.com:3000)
+  [http://flightoperator.eastus.cloudapp.azure.com/v1/flights](http://flightoperator.eastus.cloudapp.azure.com/v1/flights)
 - enable auto deployments when merging to master / develop (Jenkins)
+- enable plugins.txt for Jenkins (and save in repo)
+- enable config as code for Jenkins (and sae in repo)
+- add some users to grafana
 https://docs.microsoft.com/de-de/azure/container-service/kubernetes/

@@ -48,6 +48,7 @@ spec:
         image: flightoperatorreg.azurecr.io/flightoperator:latest
         ports:
         - containerPort: 80
+        - containerPort: 2112
         resources:
           requests:
             cpu: 250m
@@ -63,6 +64,78 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 80
+  - name: flightsendpoint
+    port: 80
+  - name: metricsendpoint
+    port: 2112
   selector:
     app: flightoperator
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: flightoperatorreg.azurecr.io/prometheus:latest
+        ports:
+        - containerPort: 9090
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  ports:
+  - port: 9090
+  selector:
+    app: prometheus
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: flightoperatorreg.azurecr.io/grafana:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3000
+  selector:
+    app: grafana

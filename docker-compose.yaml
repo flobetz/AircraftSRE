@@ -11,13 +11,13 @@ services:
     container_name: flightoperator
     ports:
         - "80:80"
-        - "2112:2112"
+        - "2112"
     restart: always
   prometheus:
     image: flightoperatorreg.azurecr.io/prometheus:latest
     container_name: prometheus
     ports:
-        - "9090:9090"
+        - "9090"
   grafana:
       image: flightoperatorreg.azurecr.io/grafana:latest
       container_name: grafana

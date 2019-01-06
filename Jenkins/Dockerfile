@@ -37,6 +37,10 @@ RUN wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linu
     unzip terraform_0.11.11_linux_amd64.zip && \
     mv terraform /usr/local/bin/
 
+# install Jenkins plugins on startup
+COPY ./plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
+
 USER jenkins
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/jenkins.sh"]
 

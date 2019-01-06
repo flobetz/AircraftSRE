@@ -128,7 +128,7 @@ sleep 3
 echo "unsuccessful get All flights"
 echo ""
 curl -i -u flightoperator:topsecret! --request GET \
-  $URLv/v1/flight
+  $URL/v1/flight
 echo ""
 echo ""
 sleep 3

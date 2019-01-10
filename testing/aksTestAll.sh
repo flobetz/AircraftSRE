@@ -1,196 +1,154 @@
 #!/usr/bin/env bash
-
+set -x
 URL=http://flightoperator.eastus.cloudapp.azure.com
 
 # insert flights
-echo "insert flight 1"
-echo ""
+printf "insert flight 1:\n"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"Start":"1","End":"1","Aircraft":"DHC-8-400","Departure":"2020-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "insert flight 2"
-echo ""
+printf "insert flight 2"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"Start":"1","End":"1","Aircraft":"Boeing B737","Departure":"2020-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "insert flight 3"
-echo ""
+printf "insert flight 3"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"Start":"1","End":"1","Aircraft":"Airbus A340","Departure":"2020-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
 # get all flights
-echo "get all flights:"
-echo ""
+printf "get all flights:"
 curl -i -u flightoperator:topsecret! --request GET \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
 # get only one flight
-echo "get only one flight:"
-echo ""
+printf "get only one flight:"
 curl -i -u flightoperator:topsecret! --request GET \
   $URL/v1/flights/1
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
 # delete flight one
-echo "delete one flight"
-echo ""
+printf "delete one flight"
 curl -i -u flightoperator:topsecret! --request DELETE \
   $URL/v1/flights/3
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
 # get all flights again
-echo "get all flights agin:"
-echo ""
+printf "get all flights agin:"
 curl -i -u flightoperator:topsecret! --request GET \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
 # test basic auth
-echo "wrongpw:"
-echo ""
+printf "wrongpw:"
 curl -i -u flightoperator:wrongpw --request GET \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "wronguser:"
-echo ""
+printf "wronguser:"
 curl -i -u wronguser:topsecret! --request GET \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "no auth:"
-echo ""
+printf "no auth:"
 curl -i --request GET \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
 # testing http responses
-echo "testing http responses:"
-echo ""
-echo "successful DB entry:"
-echo ""
+printf "testing http responses:"
+printf ""
+printf "successful DB entry:"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"Start":"3","End":"3","Aircraft":"DHC-8-400","Departure":"2020-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "unsuccessful DB entry:"
-echo ""
+printf "unsuccessful DB entry:"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"flightNumber":"1"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "successful get All flights"
-echo ""
+printf "successful get All flights"
 curl -i -u flightoperator:topsecret! --request GET \
     $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "unsuccessful get All flights"
-echo ""
+printf "unsuccessful get All flights"
 curl -i -u flightoperator:topsecret! --request GET \
   $URL/v1/flight
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "successful get specific flight"
-echo ""
+printf "successful get specific flight"
 curl -i -u flightoperator:topsecret! --request GET \
   $URL/v1/flights/1
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "unsuccessful get specific flight"
-echo ""
+printf "unsuccessful get specific flight"
 curl -i -u flightoperator:topsecret! --request GET \
   $URL/v1/flights/doesnotexist
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "successful delete flight"
-echo ""
+printf "successful delete flight"
 curl -i -u flightoperator:topsecret! --request DELETE \
   $URL/v1/flights/3
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "unsuccessful delete flight"
-echo ""
+printf "unsuccessful delete flight"
 curl -i -u flightoperator:topsecret! --request DELETE \
   $URL/v1/flights/doesnotexist
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "try to insert flight with wrong aircraft:"
-echo ""
+printf "try to insert flight with wrong aircraft:"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"Start":"1","End":"1","Aircraft":"doesnotexist","Departure":"2020-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "try to insert flight with departure time in past:"
-echo ""
+printf "try to insert flight with departure time in past:"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"Start":"1","End":"1","Aircraft":"Airbus A340","Departure":"2015-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7
 
-echo "try to insert flight with wrong json format"
-echo ""
+printf "try to insert flight with wrong json format"
 curl -i -u flightoperator:topsecret! --header "Content-Type: application/json" \
   --request POST \
   --data '{"fieldDoesNotExist":"1","End":"1","Aircraft":"Airbus A340","Departure":"2015-10-10T10:00:00Z"}' \
   $URL/v1/flights
-echo ""
-echo ""
-sleep 3
+printf "\n\n"
+sleep 7

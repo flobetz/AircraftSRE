@@ -48,3 +48,20 @@ everything is tracked as code and secrets are managed globally
     - DeployInfrastructure.groovy: Applies the given Terraform code to Azure.
     - ListImages.groovy: Jenkinsfile which lists all Docker images of the private Azure Docker registry.
 - testing: Bash script which calls all endpoints of the webservice which is running in Azure 
+
+### LICENSE
+```
+Copyright 2018 flobetz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
